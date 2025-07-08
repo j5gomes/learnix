@@ -20,38 +20,58 @@ defmodule Servy.Handler do
       |> List.first()
       |> String.split(" ")
 
-    %{method: method, path: path, resp_body: ""}
+    %{
+      method: method,
+      path: path,
+      resp_body: "",
+      status: nil
+    }
   end
 
   def route(conv) do
     route(conv, conv.method, conv.path)
   end
 
-  def route(conv, "GET", "/learnix") do
-    %{conv | resp_body: "Learnix"}
+  def route(conv, "GET", "/significa") do
+    %{conv | status: 200, resp_body: "Significa"}
   end
 
   def route(conv, "GET", "/eggs") do
-    %{conv | resp_body: "Eggs"}
+    %{conv | status: 200, resp_body: "Eggs"}
   end
 
-  def route(conv, "GET", "/curb") do
-    %{conv | resp_body: "Curb"}
+  def route(conv, "GET", "/eggs/" <> id) do
+    %{conv | status: 200, resp_body: "Egg #{id}"}
+  end
+
+  def route(conv, _method, path) do
+    %{conv | status: 404, resp_body: "No #{path} here!"}
   end
 
   def format_response(conv) do
     """
-    HTTP/1.1 200 OK
+    HTTP/1.1 #{conv.status} #{status_reason(conv.status)}
     Content-Type: text/html
     Content-Length: #{String.length(conv.resp_body)}
 
     #{conv.resp_body}
     """
   end
+
+  defp status_reason(code) do
+    %{
+      200 => "OK",
+      201 => "Created",
+      401 => "Unauthorized",
+      403 => "Forbidden",
+      404 => "Not Found",
+      500 => "Internal Server Error"
+    }[code]
+  end
 end
 
 request = """
-GET /learnix HTTP/1.1
+GET /significa HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
@@ -64,6 +84,18 @@ IO.puts(response)
 
 request = """
 GET /eggs HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.handle(request)
+
+IO.puts(response)
+
+request = """
+GET /eggs/1 HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
