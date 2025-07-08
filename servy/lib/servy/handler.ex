@@ -6,10 +6,25 @@ defmodule Servy.Handler do
 
     request
     |> parse
+    |> rewrite_path
     |> log
     |> route
+    |> track
     |> format_response
   end
+
+  def track(%{status: 404, path: path} = conv) do
+    IO.puts("Warning #{path} is on the loose!")
+    conv
+  end
+
+  def track(conv), do: conv
+
+  def rewrite_path(%{path: "/significa"} = conv) do
+    %{conv | path: "torrinha"}
+  end
+
+  def rewrite_path(conv), do: conv
 
   def log(conv), do: IO.inspect(conv)
 
@@ -28,23 +43,23 @@ defmodule Servy.Handler do
     }
   end
 
-  def route(conv) do
-    route(conv, conv.method, conv.path)
-  end
+  # def route(conv) do
+  #   route(conv, conv.method, conv.path)
+  # end
 
-  def route(conv, "GET", "/significa") do
+  def route(%{method: "GET", path: "/significa"} = conv) do
     %{conv | status: 200, resp_body: "Significa"}
   end
 
-  def route(conv, "GET", "/eggs") do
+  def route(%{method: "GET", path: "/eggs"} = conv) do
     %{conv | status: 200, resp_body: "Eggs"}
   end
 
-  def route(conv, "GET", "/eggs/" <> id) do
+  def route(%{method: "GET", path: "/eggs/" <> id} = conv) do
     %{conv | status: 200, resp_body: "Egg #{id}"}
   end
 
-  def route(conv, _method, path) do
+  def route(%{path: path} = conv) do
     %{conv | status: 404, resp_body: "No #{path} here!"}
   end
 
@@ -108,6 +123,18 @@ IO.puts(response)
 
 request = """
 GET /curb HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.handle(request)
+
+IO.puts(response)
+
+request = """
+GET /torrinha HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
