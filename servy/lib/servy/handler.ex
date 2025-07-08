@@ -21,16 +21,16 @@ defmodule Servy.Handler do
   end
 
   def route(conv) do
-    conv = %{method: 'GET', path: '/wild', resp_body: "Significa, Egg, FCPorto"}
+    %{conv | resp_body: "Eggs"}
   end
 
   def format_response(conv) do
     """
     HTTP/1.1 200 OK
     Content-Type: text/html
-    Content-Length: 20
+    Content-Length: #{String.length(conv.resp_body)}
 
-    Significa, Egg, FCPorto
+    #{String.length(conv.resp_body)}
     """
   end
 end
