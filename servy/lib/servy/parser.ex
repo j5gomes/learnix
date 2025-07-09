@@ -1,5 +1,6 @@
 defmodule Servy.Parser do
   @moduledoc "Parser."
+  alias Servy.Conv
 
   @doc """
     Parses the request.
@@ -11,11 +12,9 @@ defmodule Servy.Parser do
       |> List.first()
       |> String.split(" ")
 
-    %{
+    %Conv{
       method: method,
-      path: path,
-      resp_body: "",
-      status: nil
+      path: path
     }
   end
 end
