@@ -2,6 +2,7 @@ defmodule Servy.Handler do
   @moduledoc "Handles HTTP requests."
 
   alias Servy.Conv
+  alias Servy.BearController
 
   @pages_path Path.expand("../../pages", __DIR__)
 
@@ -25,24 +26,21 @@ defmodule Servy.Handler do
     |> format_response
   end
 
-  def route(%Conv{method: "GET", path: "/significa"} = conv) do
-    %{conv | status: 200, resp_body: "Significa"}
+  def route(%Conv{method: "GET", path: "/wildthings"} = conv) do
+    %{conv | status: 200, resp_body: "wildthings"}
   end
 
-  def route(%Conv{method: "GET", path: "/eggs"} = conv) do
-    %{conv | status: 200, resp_body: "Eggs"}
+  def route(%Conv{method: "GET", path: "/bears"} = conv) do
+    BearController.index(conv)
   end
 
-  def route(%Conv{method: "GET", path: "/eggs/" <> id} = conv) do
-    %{conv | status: 200, resp_body: "Egg #{id}"}
+  def route(%Conv{method: "GET", path: "/bears/" <> id} = conv) do
+    params = Map.put(conv.params, "id", id)
+    BearController.show(conv, params)
   end
 
-  def route(%Conv{method: "POST", path: "/eggs"} = conv) do
-    %{
-      conv
-      | status: 200,
-        resp_body: "Created a #{conv.params["role"]} egg named #{conv.params["name"]}!"
-    }
+  def route(%Conv{method: "POST", path: "/bears"} = conv) do
+    BearController.create(conv, conv.params)
   end
 
   def route(%Conv{method: "GET", path: "/about"} = conv) do
@@ -97,7 +95,7 @@ defmodule Servy.Handler do
 end
 
 request = """
-GET /significa HTTP/1.1
+GET /wildthings HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
@@ -109,7 +107,7 @@ response = Servy.Handler.handle(request)
 IO.puts(response)
 
 request = """
-GET /eggs HTTP/1.1
+GET /bears HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
@@ -121,7 +119,7 @@ response = Servy.Handler.handle(request)
 IO.puts(response)
 
 request = """
-GET /eggs/1 HTTP/1.1
+GET /bears/1 HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
@@ -133,7 +131,7 @@ response = Servy.Handler.handle(request)
 IO.puts(response)
 
 request = """
-POST /eggs HTTP/1.1
+POST /bears HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
