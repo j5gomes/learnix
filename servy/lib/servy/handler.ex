@@ -37,6 +37,14 @@ defmodule Servy.Handler do
     %{conv | status: 200, resp_body: "Egg #{id}"}
   end
 
+  def route(%Conv{method: "POST", path: "/eggs"} = conv) do
+    %{
+      conv
+      | status: 200,
+        resp_body: "Created a #{conv.params["role"]} egg named #{conv.params["name"]}!"
+    }
+  end
+
   def route(%Conv{method: "GET", path: "/about"} = conv) do
     @pages_path
     |> Path.join("about.html")
@@ -118,6 +126,21 @@ Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
 
+"""
+
+response = Servy.Handler.handle(request)
+
+IO.puts(response)
+
+request = """
+POST /eggs HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+Content-Type: application/x-www-form-urlencoded
+Content-Lenght: 21
+
+name=Joao&role=frontend
 """
 
 response = Servy.Handler.handle(request)

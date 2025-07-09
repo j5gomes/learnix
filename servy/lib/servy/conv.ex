@@ -1,10 +1,14 @@
 defmodule Servy.Conv do
-  @moduledoc "Conv module"
+  @moduledoc "Connection/Conversation module"
 
   @doc """
-    struct
+   Connection/Conversation struct
   """
-  defstruct method: "", path: "", resp_body: "", status: nil
+  defstruct method: "",
+            path: "",
+            params: %{},
+            resp_body: "",
+            status: nil
 
   def full_status(conv) do
     "#{conv.status} #{status_reason(conv.status)}"
